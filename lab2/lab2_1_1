@@ -1,0 +1,28 @@
+import turtle
+
+turtle.penup()
+turtle.goto(-150, 0)
+turtle.pendown()
+def koch(order, size):
+    turtle.color('green')
+    if order == 0:
+        turtle.forward(size)
+    else:
+        koch(order-1, size/3)
+        turtle.left(60)
+        koch(order-1, size/3)
+        turtle.right(120)
+        koch(order-1, size/3)
+        turtle.left(60)
+        koch(order-1, size/3)
+
+def main():
+    order = 4
+    size = 600
+    turtle.speed(0)
+    turtle.hideturtle()
+
+    koch(order, size)
+
+if __name__ == "__main__":
+    main()
