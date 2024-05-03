@@ -1,0 +1,33 @@
+import turtle
+
+size = 300
+n = 0
+
+def koch_curve(size, n):
+    turtle.color('green')
+    turtle.hideturtle()
+    if n == 0:
+        turtle.forward(size)
+    else:
+        koch_curve(size / 3, n - 1)
+        turtle.left(60)
+        koch_curve(size / 3, n - 1)
+        turtle.right(120)
+        koch_curve(size / 3, n - 1)
+        turtle.left(60)
+        koch_curve(size / 3, n - 1)
+
+
+def draw_koch_snowflake(size, n):
+    for i in range(3):
+        koch_curve(size, n)
+        turtle.right(120)
+        #n += 1
+
+
+#draw_koch_snowflake(size, n)
+for i in range(4):
+    turtle.reset()
+    turtle.speed(0)
+    draw_koch_snowflake(size, n)
+    n += 1
