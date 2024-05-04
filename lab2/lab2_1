@@ -1,0 +1,29 @@
+import turtle
+
+def draw_koch_snowflake(size):
+    if size > 6:
+        size2 = size // 3
+        draw_koch_snowflake(size2)
+        turtle.left(60)
+        draw_koch_snowflake(size2)
+        turtle.right(120)
+        draw_koch_snowflake(size2)
+        turtle.left(60)
+        draw_koch_snowflake(size2)
+    else:
+        turtle.forward(size)
+        turtle.left(60)
+        turtle.forward(size)
+        turtle.right(120)
+        turtle.forward(size)
+        turtle.left(60)
+        turtle.forward(size)
+def draw(size):
+    for i in range(3):
+        draw_koch_snowflake(size)
+        turtle.right(120)
+
+turtle.color('red')
+turtle.hideturtle()
+turtle.speed(0)
+draw(50)
