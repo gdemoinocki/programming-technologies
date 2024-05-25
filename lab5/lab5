@@ -1,0 +1,102 @@
+import os
+
+def file_size(path):
+    """Возвращает размер файла в байтах."""
+    return os.path.getsize(path)
+
+
+# Берет входной файл, считывает его содержимое и сжимает данные, используя алгоритм LZ77.
+# Затем записывает сжатые данные в выходной файл.
+
+
+def lz77_compress(input_file_path, output_file_path, window_size=1250):
+    # Открываем входной файл для чтения и считываем его содержимое
+    with open(input_file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+
+    compressed_data = [] # Инициализируем список сжатых данных
+    i = 0 # Указатель на текущую позицию в тексте
+
+    # В этом цикле происходит сжатие данных с использованием алгоритма LZ77. Цикл продолжается, пока i меньше длины текста.
+    while i < len(text):
+        # Инициализируем переменные для хранения лучшего совпадения
+        max_match_distance = 0 #дистанция
+        max_match_length = 0 #длинна совпадений
+        next_char = ''
+        # Ищем лучшее совпадение в окне поиска подстроки текста
+        for j in range(max(0, i - window_size), i):
+            k = 0
+            # Ищем длину совпадения
+            while i + k < len(text) and text[j + k] == text[i + k]:
+                k += 1
+                # Обновляем лучшее совпадение
+                if k > max_match_length:
+                    max_match_distance = i - j
+                    max_match_length = k
+        # Если совпадение найдено, записываем его в сжатые данные
+        if i + max_match_length < len(text):
+            next_char = text[i + max_match_length]
+        else:
+            next_char = ''
+        # Затем данные о совпадении добавляются в список compressed_data, и i обновляется для перехода к следующей части текста.
+        compressed_data.append((max_match_distance, max_match_length, next_char))
+        i += max_match_length + 1
+
+    # Открываем выходной файл для записи сжатых данных
+    with open(output_file_path, 'wb') as file:
+        # Записываем сжатые данные в выходной файл
+        for distance, length, char in compressed_data:
+            file.write(distance.to_bytes(2, byteorder='big'))# Записываем расстояние до начала совпадения
+            file.write(length.to_bytes(1, byteorder='big'))# Записываем длину совпадения
+            char_encoded = char.encode('utf-8')# Кодируем следующий символ
+            file.write(len(char_encoded).to_bytes(1, byteorder='big'))#записываем его длину
+            file.write(char_encoded)# Записываем кодированный символ
+
+
+# Берет сжатый файл, считывает сжатые данные и декомпрессирует их, используя алгоритм LZ77.
+# Затем записывает распакованный текст в выходной файл.
+
+def lz77_decompress(input_file_path, output_file_path):
+    with open(input_file_path, 'rb') as file:
+        compressed_data = file.read()# Считываем сжатые данные
+    # Инициализируем декомпрессированный текст
+    decompressed_text = ''
+    i = 0
+    # Цикл для декомпрессии текста
+    while i < len(compressed_data):
+        # Считываем данные о совпадении
+        distance = int.from_bytes(compressed_data[i:i + 2], byteorder='big')
+        length = compressed_data[i + 2]
+        char_length = compressed_data[i + 3]
+        char = compressed_data[i + 4:i + 4 + char_length].decode('utf-8')# Считываем следующий символ после совпадения
+        i += 4 + char_length # Переходим к следующей позиции в сжатых данных
+        # Копируем предыдущие символы из декомпрессированного текста
+        for j in range(length):
+            if distance > 0:
+                decompressed_text += decompressed_text[-distance]
+            else:
+                break
+        decompressed_text += char # Добавляем следующий символ после совпадения
+    # Открываем выходной файл для записи декомпрессированного текста
+    with open(output_file_path, 'w', encoding='utf-8') as file:
+        file.write(decompressed_text)
+
+
+input_file_path = 'war_and_peace.txt'
+#input_file_path = 'lab5.txt'
+compressed_file_path = 'lab5.compressed.lz77'
+decompressed_file_path = 'lab5.decompressed.txt'
+
+lz77_compress(input_file_path, compressed_file_path)
+lz77_decompress(compressed_file_path, decompressed_file_path)
+
+original_size = file_size(input_file_path)
+compressed_size = file_size(compressed_file_path)
+decompressed_size = file_size(decompressed_file_path)
+ssr = (1 - compressed_size / original_size) * 100
+
+print(f"Сжатие и декомпрессия файла завершены.")
+print(f"Размер исходного файла: {original_size} байт")
+print(f"Размер сжатого файла: {compressed_size} байт")
+print(f"Размер разжатого файла: {decompressed_size} байт")
+print(f"Коэффициент сжатия (SSR) в процентах: {ssr:.2f}%")
