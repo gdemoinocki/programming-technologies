@@ -1,0 +1,74 @@
+class CountingSorter:
+    def __init__(self, collection):
+        self.collection = collection
+        self.max_value = max(collection)
+        self.min_value = min(collection)
+
+    def col(self, sorted_collection1, index1, element1):
+        sorted_collection1[index1] = element1
+        return sorted_collection1
+
+    def counter(self):
+        counts = [0] * (self.max_value - self.min_value + 1)
+        # Подсчитываем количество вхождений каждого элемента
+        for element in self.collection:
+            counts[element - self.min_value] += 1
+        # Накапливаем количество вхождений
+        for i in range(1, len(counts)):
+            counts[i] += counts[i - 1]
+        return counts
+
+    def sort(self):
+        counts = self.counter()
+        # Создаем отсортированный массив
+        sorted_collection = [None] * len(collection)
+        # Помещаем элементы в отсортированный массив в правильном порядке
+        for i in range(len(collection) - 1, -1, -1):
+            element = collection[i]
+            index = counts[element - self.min_value] - 1
+            sorted_collection = self.col(sorted_collection,  index, element)
+            counts[element - self.min_value] -= 1
+        # Возвращаем отсортированный массив
+        return sorted_collection
+
+
+
+class CountingSorterWithIntermediateData(CountingSorter):
+    def get_intermediate_data(self, collection):
+        counts = self.counter()
+        intermediate_data = [None] * len(collection)
+        data = []
+        datat = data.copy()
+        j = -1
+
+        for i in range(len(collection) - 1, -2, -1):
+            data = intermediate_data.copy()
+            datat.append(data)
+            element = collection[i]
+            index = counts[element - self.min_value] - 1
+            intermediate_data = self.col(intermediate_data,  index, element)
+            counts[element - self.min_value] -= 1
+            j += 1
+
+        return datat
+
+
+class CountingSortVisualizer():
+    def visualize(self, collection):
+        print('Сортировка подсчетом:')
+        for i in range(0, len(collection), 1):
+            print(i+1, collection[i])
+
+
+# Создаем коллекцию элементов для сортировки
+collection = [5, 2, 7, 3, 2, 4, 7, 6]
+print('Начальная коллекция', collection)
+# Создаем сортировщик с использованием подсчета
+sorter = CountingSorterWithIntermediateData(collection)
+sorter.sort()
+
+# Получаем промежуточные данные о ходе сортировки
+intermediate_data = sorter.get_intermediate_data(collection)
+# Визуализируем процесс сортировки
+visualizer = CountingSortVisualizer()
+visualizer.visualize(intermediate_data)
